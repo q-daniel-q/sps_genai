@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile  # NEW: File, UploadFile
 from pydantic import BaseModel
 
 from app.bigram_model import BigramModel
 from app.embedding_model import EmbeddingModel
+from app.image_classifier import ImageClassifier  # NEW
 
 app = FastAPI(title="SPS GenAI API")
 
@@ -17,6 +18,7 @@ It tells the story of Edmond Dantès, who is falsely imprisoned and later seeks 
 
 bigram_model = BigramModel(corpus)
 embedding_model = EmbeddingModel("en_core_web_md")
+image_classifier = ImageClassifier()  # NEW: loads app/models/cnn_cifar10.pth
 
 
 class TextGenerationRequest(BaseModel):
@@ -57,3 +59,17 @@ def get_embedding_by_path(word: str):
 def get_similarity(word1: str, word2: str):
     return {"word1": word1, "word2": word2,
             "similarity": embedding_model.similarity(word1, word2)}
+
+
+# ---------- Assignment 2: CNN image classifier (NEW) ----------
+@app.post("/classify")
+async def classify_image(file: UploadFile = File(...)):
+    """Upload an image and get its predicted CIFAR10 class."""
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="please upload an image file")
+    image_bytes = await file.read()
+    try:
+        result = image_classifier.predict(image_bytes)
+    except Exception:
+        raise HTTPException(status_code=400, detail="could not read the image")
+    return {"filename": file.filename, **result}

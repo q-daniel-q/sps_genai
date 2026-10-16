@@ -1,13 +1,23 @@
 [project]
 name = "sps-genai"
 version = "0.1.0"
-description = "APAN 5560 Assignment 1: FastAPI with bigram text generation and spaCy word embeddings"
+description = "APAN 5560 assignments: FastAPI with text generation, word embeddings and a CNN image classifier"
 requires-python = ">=3.12"
 dependencies = [
     "en-core-web-md",
     "fastapi[standard]>=0.142.2",
     "spacy>=3.8.16",
+    "torch>=2.8",
+    "torchvision>=0.23",
+    "tqdm>=4.66",
 ]
 
 [tool.uv.sources]
 en-core-web-md = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl" }
+torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
